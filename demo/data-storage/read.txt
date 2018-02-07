@@ -1,0 +1,33 @@
+                  server 3000 express
+app-all           client local-tcp role:math
+                  client 9002  role:shop
+
+shop-service      server 9002 role:shop
+                  client 9003 role:shop,info:purchase
+
+shop-stats        server 9003 role:shop,info:purchase
+
+math-pin-service  server local-tcp role:math
+
+整个系统关系 app-all 在3000端口启动express web服务并依赖local,9002的微服务，而9002微服务又依赖9003的微服务
+
+1 启动三个服务 local,9002,9003, math-pin-service,shop-service,shop-stats
+
+2 再启动web服务 app-all
+
+3 app-all 最后一行 创建product,根据模式role:shop 发送给9002 shop-service服务，shop-service 调用shop plugin,
+匹配到'role:shop,add:product' 创建完成后控制台打印信息如： null $-/-/product:{id=mbm07t;name=Apple;price=1.99}
+
+4 根据上面的id=mbm07t 查询信息，访问 http://localhost:3000/api/shop/get?pid=mbm07t
+首先访问app-all,根据senecaWeb 对express url和seneca模式匹配的映射（api-all）,/api/shop/get?pid=mbm07t 映射到 'role:api,path:shop'
+经过第23行 act { role:'shop', id:id ,get:'product'} 根据模式role:shop 发送给 9002 shop-service服务 调用shop plugin 匹配到'role:shop,get:product'
+将书本的信息复制给 `purchase` 实体，并保存该订单，然后，发送 `role:store,info:purchase` 消息，根据 pin 'role:shop,info:purchase'给 9003 匹配'role:shop,info:purchase'
+返回 {"name":"Apple","price":1.99,"id":"mbm07t"}
+
+5 购买操作。curl -d '{"pid":"mbm07t"}' -H "content-type:application/json" http://localhost:3000/api/shop/purchase
+首先访问app-all,根据senecaWeb 对express url和seneca模式匹配的映射（api-all）,/api/shop/purchase 映射到 'role:api,path:shop'
+经过第23行 act { role:'shop', id:id ,cmd:'purchase'} 根据模式role:shop 发送给 9002 shop-service服务 调用shop plugin 匹配到'role:shop,cmd:purchase'
+成功后返回 {"when":1436536799159,"product":"mbm07t","name":"Apple","price":1.99,"id":"ny09dx"}
+
+6 访问 http://localhost:3000/api/calculate/sum?left=2&right=3，匹配到 api-all 的 'role:api,path:calculate'，根据role:math发送给本地服务math-pin-service
+  调用 math plugin 计算返回  {"answer":5}
