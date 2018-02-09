@@ -6,6 +6,10 @@ seneca
     respond({color});
   })
   .use('mesh', {
+    host: 'localhost',
+    port: 3000,
     isbase: true,
+    // monitor: true
     pin: 'format:hex'
   });
+
