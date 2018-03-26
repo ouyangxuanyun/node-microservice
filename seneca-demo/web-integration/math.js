@@ -3,6 +3,13 @@ module.exports = function math(options) {
         respond(null, {answer: msg.left + msg.right})
     })
 
+    this.add('role:math,cmd:sum,timeout:ok', function sum(msg, respond) {
+        // setTimeout(() => {
+        //     respond(null, {answer: msg.left + msg.right})
+        // },3000)
+        throw new Error('my own err')
+    })
+
     this.add('role:math,cmd:product', function product(msg, respond) {
         respond(null, {answer: msg.left * msg.right})
     })

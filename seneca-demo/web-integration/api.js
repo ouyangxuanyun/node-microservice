@@ -6,10 +6,12 @@ module.exports = function api () {
     let operation = msg.args.params.operation;
     let left = msg.args.query.left;
     let right = msg.args.query.right;
-    this.act('role:math', {
+    let timeout = msg.args.query.timeout
+    this.act('role:math',{
       cmd: validOps[operation],
       left,
       right,
+      timeout,
     }, respond);
   });
 
