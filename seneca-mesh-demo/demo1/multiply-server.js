@@ -5,8 +5,7 @@ seneca
     respond(null, {ok: msg.left * msg.right});
   })
   .use('mesh', {
-    host: 'localhost',
-    port: 3001,
-    isbase: true,
+    // bases: ['127.0.0.1'],
+    // port: 3003,
     pin: 'role:multiply'
   });
